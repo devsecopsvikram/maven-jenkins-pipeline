@@ -21,21 +21,23 @@ pipeline {
               }
             }
         }
-        
-
-      stage('Sonarqube Analysis - SAST') {
-            steps {
-                  withSonarQubeEnv('SonarQube') {
-           sh "mvn sonar:sonar \
-                              -Dsonar.projectKey=maven-jenkins-pipeline \
-                        -Dsonar.host.url=http://34.173.74.192:9000" 
-                }
-           timeout(time: 2, unit: 'MINUTES') {
-                      script {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
+   post {
+        always {
+            script {
+                cest = TimeZone.getTimeZone("CEST")
+                def cest = new Date()
+                println(cest) 
+                def mailRecipients = 'vsingh@zuelligpharma.com'
+                def jobName = currentBuild.fullDisplayName
+                env.Name = Jenkins
+                env.cest = cest
+                emailext body: '''${SCRIPT, template="email-html.template"}''',
+                mimeType: 'text/html',
+                subject: "[Jenkins] ${jobName}",
+                to: "${mailRecipients}",
+                replyTo: "${mailRecipients}"
               }
-        }
-     }
+          }   
+      }
+    }
 }
